@@ -8,29 +8,66 @@
 import XCTest
 @testable import iOS_Interview
 
+class MockCoreDataService: CoreDataService {
+    func store(_ table: CoreDataTable) { }
+    func fetchAll<T: CoreDataTable>(_ table: T.Type, completion: @escaping ([T]) -> Void) { }
+}
+
 class iOS_InterviewTests: XCTestCase {
-
+    
+    var sut: CoreDataStorer!
+    
+    let mockCoreDataService = MockCoreDataService()
+    
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        try super.setUpWithError()
+        sut = CoreDataStorer(coreDateService: mockCoreDataService)
+        
     }
-
+    
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        sut = nil
+        try super.tearDownWithError()
     }
-
-    func testExample() throws {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // Any test you write for XCTest can be annotated as throws and async.
-        // Mark your test throws to produce an unexpected failure when your test encounters an uncaught error.
-        // Mark your test async to allow awaiting for asynchronous code to complete. Check the results with assertions afterwards.
+    
+    func testSave() throws {
+        let user = User(id: "1",
+                        name: "test1",
+                        email: "test1@gmail.com",
+                        isDesigner: true)
+        
+        let convertUserTable = sut.save(user: user)
+        
+        XCTAssertEqual(convertUserTable.id, "1")
+        XCTAssertEqual(convertUserTable.field_name, "test1")
+        XCTAssertEqual(convertUserTable.field_email, "test1@gmail.com")
+        XCTAssertEqual(convertUserTable.field_is_designer, true)
+        
     }
+    
+    func testFetch() throws {
+        let user = User(id: "1",
+                        name: "test1",
+                        email: "test1@gmail.com",
+                        isDesigner: true)
 
+        sut.fetch(user: user) { result in
+    
+            switch result {
+            case .success(let testUser):
+                XCTAssertEqual(testUser.id, user.id)
+                XCTAssertEqual(testUser.name, user.name)
+                XCTAssertEqual(testUser.email, user.email)
+            case .failure(let error):
+                XCTAssertNotNil(error)
+            }
+        }
+        
+    }
+    
     func testPerformanceExample() throws {
-        // This is an example of a performance test case.
         self.measure {
-            // Put the code you want to measure the time of here.
+            
         }
     }
-
 }

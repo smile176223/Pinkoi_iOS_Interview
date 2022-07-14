@@ -9,5 +9,7 @@ import Foundation
 
 protocol CoreDataService {
     func store(_ table: CoreDataTable)
+//    func store<T>(_ data: T)
     func fetchAll<T: CoreDataTable>(_ table: T.Type, completion: @escaping ([T]) -> Void)
+//    func fetchAll<T>(_ table: T.Type, completion: @escaping ([T]) -> Void)
 }
