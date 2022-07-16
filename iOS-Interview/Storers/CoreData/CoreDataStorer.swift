@@ -19,6 +19,9 @@ final class CoreDataStorer {
 extension CoreDataStorer {
     enum CoreDataStorerError: Error {
         case notFound
+        
+        // Question 2
+        case wrongDataType
     }
 }
 
@@ -50,6 +53,58 @@ extension CoreDataStorer {
                                     isDesigner: coreDataTable.field_is_designer)
                     completion(.success(user))
                     break
+                }
+            }
+            completion(.failure(CoreDataStorerError.notFound))
+        }
+    }
+}
+
+
+// Question 2
+extension CoreDataStorer {
+    func saveAll(data: DataType) {
+        switch data {
+        case .userTable(let userTable):
+            coreDateService.store(userTable)
+            
+        case .productTable(let productTable):
+            coreDateService.store(productTable)
+            
+        default:
+            break
+            
+        }
+    }
+    
+    func fetchAll(data: DataType, completion: @escaping (Result<DataType, CoreDataStorerError>) -> Void) {
+        coreDateService.fetchAll(DataType.self) { data in
+            for datum in data {
+                switch datum {
+                case .userTable(let userTable):
+                    let user = User(id: userTable.id,
+                                    name: userTable.field_name,
+                                    email: userTable.field_email,
+                                    isDesigner: userTable.field_is_designer)
+                    let dataUser = DataType.user(user)
+                    completion(.success(dataUser))
+                    
+                case .productTable(let productTable):
+                    let user = User(id: productTable.user.id,
+                                    name: productTable.user.field_name,
+                                    email: productTable.user.field_email,
+                                    isDesigner: productTable.user.field_is_designer)
+                    let product = Product(id: productTable.id,
+                                          title: productTable.field_title,
+                                          description: productTable.field_description,
+                                          price: productTable.field_price,
+                                          user: user)
+                    let dataProduct = DataType.product(product)
+                    completion(.success(dataProduct))
+                    
+                default:
+                    completion(.failure(CoreDataStorerError.wrongDataType))
+                    
                 }
             }
             completion(.failure(CoreDataStorerError.notFound))
