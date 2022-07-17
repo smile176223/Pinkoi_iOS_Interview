@@ -10,7 +10,6 @@ import XCTest
 
 class MockCoreDataService: CoreDataService {
     func store(_ data: AllDataType) { }
-    
     func fetchAll<T>(_ table: T.Type, completion: @escaping ([T]) -> Void) where T : AllDataType { }
     
     func store(_ table: CoreDataTable) { }
